@@ -11,10 +11,11 @@
 
 typedef struct _booktype
 {
-	char *book;
-	char *author;
-	char *publisher;
-	char *year;
+	char book[30];
+	char author[30];
+	char publisher[30];
+	char year[20];
+	char avail;
 }booktype;
 
 typedef struct _node
@@ -29,10 +30,17 @@ int main(){
 
 	int sockfd;
 	int len, val;
-
+    int cnt=1;
+	char str[50];
 	struct sockaddr_un address;
 
 	int result;
+
+
+
+
+	while(1){
+
 	//client socket create
 	sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
 
@@ -46,14 +54,12 @@ int main(){
 	if (result == -1){
 		perror("client 1");
 		exit(1);
+	}else {
+
+	sprintf(str, "%d번 clinet Connect\n",cnt);
+	write(sockfd, &str, 50);
 	}
-	/*
-	//read and write
-	write(sockfd, &ch, 1);
-	read(sockfd, &ch, 1);
-	printf("char from server = %c\n", ch);
-	*/
-	while(1){
+
 		char ch;
 		menulist();
 		fprintf(stdout, "Menu Select = ");
@@ -63,10 +69,13 @@ int main(){
 		switch(val){
 
 				case 1:{//책목록
-
-
+				ch='1';
+				write(sockfd, &ch, 1);
+                    break;
 				}
 				case 2:{//책대여
+
+
 				ch='2';
 				write(sockfd, &ch, 1);
 	char name[20];
@@ -85,8 +94,9 @@ int main(){
 	else{
 		printf("요청하신 책이 없습니다. 다른 책을 대여해보세요.\n");
 	}
+	//close(sockfd);
 
-				continue;
+				break;
 				}
 				case 3:{//책반납
 				}

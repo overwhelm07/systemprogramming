@@ -37,6 +37,15 @@ int icnt;//보유중인 책 개수
 int rent;//빌린 책 개수
 int can_borrow;//빌릴 수 있는 책
 
+typedef struct _booktype
+{
+	char book[30];
+	char author[30];
+	char publisher[30];
+	char year[20];
+	char avail;
+}booktype;
+
 int main()
 {
 
@@ -110,7 +119,7 @@ int main()
 
 void menulist()
 {
-    system("clear");
+    //system("clear");
 	printf("\n\n");
 	printf("\t\t\tWELCOM TO 정헌 도서관 관리 프로그램!!!!!!!!!!!\n\n");
 	fprintf(stdout, "\n");
@@ -256,30 +265,54 @@ void run_server(){
 	bind(server_sockfd, (struct sockaddr *)&server_address, server_len);
 	//bind함수는 소켓에 IP주소와 포트번호를 지정해줘서 소켓통신을 할 수 있도록 준비해줌!!
 
-    //connecting accept
-		client_len = sizeof(client_address);
-		client_sockfd = accept(server_sockfd, (struct sockaddr *)&client_address, &client_len);
-	//waiting client
-	listen(server_sockfd, 5);
+
 	while (1){
-		printf("서버 구동중...\n");
-        printf("%d", count++);
+
+
 
         char ch;
         int val;
+
+
+         //connecting accept
+		client_len = sizeof(client_address);
+		client_sockfd = accept(server_sockfd, (struct sockaddr *)&client_address, &client_len);
+        //waiting client
+	    listen(server_sockfd, 5);
+	    printf("서버 구동중...\n");
+	    char str[15];
+        read(client_sockfd, &str, 50);
+        printf("%s", str);
+
         read(client_sockfd, &ch, 1);
-        //val = atoi(ch);
+
         val = (int)ch - 48; //아스키코드 48빼서 숫자로 형변환
 
         switch(val){
         case 1:{
+        query_stat = mysql_query(connection, "select * from lib order by book asc");//오름차순으로정렬함
+
+	sql_result = mysql_store_result(connection);
+
+	while ((sql_row = mysql_fetch_row(sql_result)) != NULL){
+        booktype.book=sql_row[0];
+        booktype.author=sql_row[1];
+        booktype.publisher=sql_row[2];
+        booktype.year=sql_row[4];
+        booktype.avail=sql_row[5];
+        wirte(client_sockfd, &booktype, sizeof(struct booktype));
+	}
+
+        break;
+
         }
         case 2:{
-        //client data transmit
+
+
         char *ch;
 		int len=0, tmp;
 		read(client_sockfd, &len, 1);//책이름 길이 읽기 1
-		ch = (char *)malloc(sizeof(--len));
+		ch = (char *)malloc(sizeof(len));
 		read (client_sockfd, ch, len);//책이름 읽기2
 		printf("%d", len);
 		printf("%s\n", ch);
@@ -294,9 +327,9 @@ void run_server(){
 			tmp = 0;
 			write(client_sockfd, &tmp, 1);
 		}
-
+        close(client_sockfd);
 		free(ch);
-		continue;
+		break;
         }
         case 3:{
         }
